@@ -541,10 +541,10 @@ public:
 			totalPathWeight += weightToRandomlyChosenNeighbor;
 			currentVertex = randomlyChosenNeighbor; 
 			
-			pathTaken += currentVertex; 
+			pathTaken += " " + currentVertex;
 
-			//cout << "Moving along weight w = " << weightToRandomlyChosenNeighbor << 
-			//	" to neighbor " << currentVertex << "\n"; 
+			cout << "Moving along weight w = " << weightToRandomlyChosenNeighbor << 
+				" to neighbor " << currentVertex << "\n"; 
 
 		}
 
@@ -555,47 +555,9 @@ public:
 		return totalPathWeight; 
 	}
 
-	/*If not visited - go there*/
-	void findSomePathWeight(string startingVertex, string finishingVertex)
-	{
-		string currentVertex = startingVertex; 
-
-		set<string> alreadyVisited = { currentVertex }; 
-
-		while (currentVertex != finishingVertex)
-		{
-			vector<string> neighbors = getNeighborsOfVertex(currentVertex);
-
-			for (auto& theNeighbor : neighbors)
-			{
-				if (alreadyVisited.find(theNeighbor) == alreadyVisited.end())
-				{
-					alreadyVisited.insert(theNeighbor); 
-					currentVertex = theNeighbor;
-					break; 
-				}
-
-				else
-				{
-					continue; 
-				}
-			}
-
-			cout << "Moved to " << currentVertex << "\n";
-			//for (auto& theNeighbor : neighbors)
-			//{
-			//	if (alreadyVisited.find(theNeighbor) == alreadyVisited.end())
-			//	{
-			//		alreadyVisited.insert(theNeighbor);
-			//	}
+	
 
 
-			//}
-
-		}
-
-		
-	}
 	/*Does NOT take a starting vertex (as an arg)
 	Runs through the vector of vertices and calls scanBreadth for each
 	*/

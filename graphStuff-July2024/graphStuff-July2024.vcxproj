@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="graph-July2024.cpp" />
     <ClCompile Include="Graph.cpp" />
+    <ClCompile Include="graphDemosContinued_Jul14.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graph.h" />
