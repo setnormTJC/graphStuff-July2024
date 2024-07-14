@@ -11,6 +11,8 @@
 
 #include<algorithm> //for std::set_intersection -> used for `isSubGraphOf`
 #include <unordered_set>
+#include <map>
+#include <random>
 
 using namespace std; 
 
@@ -19,7 +21,7 @@ class Graph
 };
 
 /*a simple graph class whose vertices are identified by INTEGER values (no strings like city names) */
-class SimpleGraph
+class UnweightedGraph
 {
 public: 
 	vector<int> vertices{};// = { 1, 2, 3, 4 }; 
@@ -291,7 +293,7 @@ public:
 
 #pragma endregion  - abandoned for now 
 
-	bool operator == (SimpleGraph otherGraph)
+	bool operator == (UnweightedGraph otherGraph)
 	{
 		return (this->edges == otherGraph.edges
 			&&
@@ -371,5 +373,246 @@ public:
 
 
 };
+
+struct WeightedEdge
+{
+	string vertex1; 
+	string vertex2; 
+	int weight; 
+};
+
+class WeightedUndirectedGraph
+{
+public:
+	vector<string> vertices{};// = { 1, 2, 3, 4 }; 
+	
+	/*Weighted edge is a struct of three ints - similar to a tuple 
+	(rather than the std::pair I used for the `SimpleGraph` class above*/
+	vector<WeightedEdge> edges; 
+
+	vector<string> getNeighborsOfVertex(string vertexOfInterest)
+	{
+		if (std::find(vertices.begin(), vertices.end(), vertexOfInterest) == vertices.end())
+		{
+			cout << "The vertex " << vertexOfInterest << " is not in the graph...\n";
+			return vector<string>{}; //early return of empty vector
+		}
+
+		vector<string> theNeighbors;
+
+		for (auto& aPairOfVertices : edges)
+		{
+			if (aPairOfVertices.vertex1 == vertexOfInterest)
+			{
+				theNeighbors.push_back(aPairOfVertices.vertex2);
+			}
+
+			//again, using undirected graph, so allow for switched order:
+			//(ex: {2, 1} means vertex 2 has 1 as its neighbor and 
+			//{1, 2} also means that vertex 2 has 1 as its neighbor)
+			else if (aPairOfVertices.vertex2 == vertexOfInterest)
+			{
+				theNeighbors.push_back(aPairOfVertices.vertex1);
+			}
+		}
+
+		if (theNeighbors.size() == 0)
+		{
+			cout << vertexOfInterest << " has ZERO neighbors... lonely times.\n";
+		}
+		return theNeighbors;
+	}
+
+	/*Note that there is no "root" - since graphs (not trees)*/
+	void scanBreadth(string startingVertex)
+	{
+		int numberOfVerticesVisited = 0;
+
+		int totalWeight = 0; 
+
+		//make sure startingVertex is in vertices: 
+		if (std::find(vertices.begin(), vertices.end(), startingVertex)
+			== vertices.end())
+		{
+			cout << startingVertex << " is not in the list of vertices\n";
+			return;
+		}
+
+		std::queue<string> theScanQ;
+
+		theScanQ.push(startingVertex);
+
+		unordered_set<string> alreadyVisitedSet;
+
+		while (!theScanQ.empty())
+		{
+			string currentVertex = theScanQ.front();
+
+			if (alreadyVisitedSet.find(currentVertex) == alreadyVisitedSet.end())
+			{
+				alreadyVisitedSet.insert(currentVertex);
+				numberOfVerticesVisited++;
+
+			}
+
+			//enqueue the neighbors of `currentVertex`
+			vector<string> neighborsOfCurrentVertex = this->getNeighborsOfVertex(currentVertex);
+
+			for (auto& theNeighbor : neighborsOfCurrentVertex)
+			{
+				//note that the `find` function is a MEMBER of std::set class
+				if (alreadyVisitedSet.find(theNeighbor) == alreadyVisitedSet.end())
+				{
+					//if not already visited, add to queue: 
+					theScanQ.push(theNeighbor);
+					alreadyVisitedSet.insert(theNeighbor); //use of set prevents duplicates (waste of space using vector)
+					numberOfVerticesVisited++;
+				}
+
+			}
+			cout << currentVertex << " ";
+			//the operation of interest (add weight/visit/print vertex) 
+			theScanQ.pop();
+		}
+		cout << "\n\n";
+		if (numberOfVerticesVisited != vertices.size())
+		{
+			cout << "At least one vertex in the graph was NOT visited \n";
+			cout << "This suggests something about the \"connectedness\" of the start vertex = " << startingVertex << "\n";
+		}
+
+	}
+
+
+	int findEdgeWeight(string startingVertex, string endingVertex)
+	{
+		bool edgeFound = false; 
+		for (auto& theEdge : edges)
+		{
+			if (	(theEdge.vertex1 == startingVertex && theEdge.vertex2 == endingVertex)
+
+					|| 
+
+					(theEdge.vertex2 == startingVertex && theEdge.vertex1 == endingVertex)
+				)
+			{
+				edgeFound = true; 
+				return theEdge.weight;
+			}
+		}
+
+		if (edgeFound == false)
+		{
+			cout << "No edge found between vertices " << startingVertex << " and " << endingVertex << "\n";
+			return -1; 
+		}
+	}
+
+	/*given a startingVertex, this looks at edges where vertex1 = starting vertex and
+	randomly picks a vertex2
+	->this continues until vertex1 = endingVertex
+	NOTE that if graph of interest is not "sufficiently connected", this random walk may lead to an infinite loop
+	@return the totalPathWeight 
+	*/
+	int takeRandomWalk_UntilSomeEnd(string startingVertex, string endingVertex)
+	{
+		string currentVertex = startingVertex; 
+
+		int totalPathWeight = 0; 
+		
+		//hold onto the path taken with string concatenation: 
+		string pathTaken = startingVertex; 
+
+		while (currentVertex != endingVertex)
+		{
+			auto neighbors = getNeighborsOfVertex(currentVertex);
+
+			//pick random neighbor to go to
+			random_device rd; 
+			mt19937 gen(rd()); 
+			uniform_int_distribution<> distribution(0, neighbors.size() - 1); 
+			//stores random integers with range neighbors[0 -> lastNeighborIndex] in ``distribution` variable 
+
+			//cout << distribution(gen) << "\n"; 
+			string randomlyChosenNeighbor = neighbors[distribution(gen)];
+
+			int weightToRandomlyChosenNeighbor = findEdgeWeight(currentVertex, randomlyChosenNeighbor);
+
+			totalPathWeight += weightToRandomlyChosenNeighbor;
+			currentVertex = randomlyChosenNeighbor; 
+			
+			pathTaken += currentVertex; 
+
+			//cout << "Moving along weight w = " << weightToRandomlyChosenNeighbor << 
+			//	" to neighbor " << currentVertex << "\n"; 
+
+		}
+
+		cout << "Path taken: " << pathTaken << "\n"; //this string COULD be returned in an overloaded version 
+													//of this function 
+		cout << "Total weight (distance) traveled: " << totalPathWeight << "\n";
+
+		return totalPathWeight; 
+	}
+
+	/*If not visited - go there*/
+	void findSomePathWeight(string startingVertex, string finishingVertex)
+	{
+		string currentVertex = startingVertex; 
+
+		set<string> alreadyVisited = { currentVertex }; 
+
+		while (currentVertex != finishingVertex)
+		{
+			vector<string> neighbors = getNeighborsOfVertex(currentVertex);
+
+			for (auto& theNeighbor : neighbors)
+			{
+				if (alreadyVisited.find(theNeighbor) == alreadyVisited.end())
+				{
+					alreadyVisited.insert(theNeighbor); 
+					currentVertex = theNeighbor;
+					break; 
+				}
+
+				else
+				{
+					continue; 
+				}
+			}
+
+			cout << "Moved to " << currentVertex << "\n";
+			//for (auto& theNeighbor : neighbors)
+			//{
+			//	if (alreadyVisited.find(theNeighbor) == alreadyVisited.end())
+			//	{
+			//		alreadyVisited.insert(theNeighbor);
+			//	}
+
+
+			//}
+
+		}
+
+		
+	}
+	/*Does NOT take a starting vertex (as an arg)
+	Runs through the vector of vertices and calls scanBreadth for each
+	*/
+	//void fullBreadthFirstScan()
+	//{
+	//	for (auto& theVertex : vertices)
+	//	{
+	//		cout << "Starting at vertex = " << theVertex
+	//			<< "-BFS visits vertices in the following order: \n";
+	//		scanBreadth_givenStartingVertex(theVertex);
+	//	}
+	//}
+
+
+
+};
+
+
 
 
