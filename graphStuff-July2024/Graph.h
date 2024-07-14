@@ -13,6 +13,7 @@
 #include <unordered_set>
 #include <map>
 #include <random>
+#include <unordered_map>
 
 using namespace std; 
 
@@ -385,11 +386,15 @@ class WeightedUndirectedGraph
 {
 public:
 	vector<string> vertices{};// = { 1, 2, 3, 4 }; 
-	
-	/*Weighted edge is a struct of three ints - similar to a tuple 
-	(rather than the std::pair I used for the `SimpleGraph` class above*/
-	vector<WeightedEdge> edges; 
 
+	/*Weighted edge is a struct of three ints - similar to a tuple
+	(rather than the std::pair I used for the `SimpleGraph` class above*/
+	vector<WeightedEdge> edges;
+
+	/*NOTE: this function DOES "handle" loops
+	* - ex: if vertex A has an edge to itself, A will be returned
+	* as one of the neighbors of A
+	*/
 	vector<string> getNeighborsOfVertex(string vertexOfInterest)
 	{
 		if (std::find(vertices.begin(), vertices.end(), vertexOfInterest) == vertices.end())
@@ -414,6 +419,8 @@ public:
 			{
 				theNeighbors.push_back(aPairOfVertices.vertex1);
 			}
+
+
 		}
 
 		if (theNeighbors.size() == 0)
@@ -428,7 +435,7 @@ public:
 	{
 		int numberOfVerticesVisited = 0;
 
-		int totalWeight = 0; 
+		int totalWeight = 0;
 
 		//make sure startingVertex is in vertices: 
 		if (std::find(vertices.begin(), vertices.end(), startingVertex)
@@ -486,17 +493,17 @@ public:
 
 	int findEdgeWeight(string startingVertex, string endingVertex)
 	{
-		bool edgeFound = false; 
+		bool edgeFound = false;
 		for (auto& theEdge : edges)
 		{
-			if (	(theEdge.vertex1 == startingVertex && theEdge.vertex2 == endingVertex)
+			if ((theEdge.vertex1 == startingVertex && theEdge.vertex2 == endingVertex)
 
-					|| 
+				||
 
-					(theEdge.vertex2 == startingVertex && theEdge.vertex1 == endingVertex)
+				(theEdge.vertex2 == startingVertex && theEdge.vertex1 == endingVertex)
 				)
 			{
-				edgeFound = true; 
+				edgeFound = true;
 				return theEdge.weight;
 			}
 		}
@@ -504,7 +511,7 @@ public:
 		if (edgeFound == false)
 		{
 			cout << "No edge found between vertices " << startingVertex << " and " << endingVertex << "\n";
-			return -1; 
+			return -1;
 		}
 	}
 
@@ -512,25 +519,25 @@ public:
 	randomly picks a vertex2
 	->this continues until vertex1 = endingVertex
 	NOTE that if graph of interest is not "sufficiently connected", this random walk may lead to an infinite loop
-	@return the totalPathWeight 
+	@return the totalPathWeight
 	*/
 	int takeRandomWalk_UntilSomeEnd(string startingVertex, string endingVertex)
 	{
-		string currentVertex = startingVertex; 
+		string currentVertex = startingVertex;
 
-		int totalPathWeight = 0; 
-		
+		int totalPathWeight = 0;
+
 		//hold onto the path taken with string concatenation: 
-		string pathTaken = startingVertex; 
+		string pathTaken = startingVertex;
 
 		while (currentVertex != endingVertex)
 		{
 			auto neighbors = getNeighborsOfVertex(currentVertex);
 
 			//pick random neighbor to go to
-			random_device rd; 
-			mt19937 gen(rd()); 
-			uniform_int_distribution<> distribution(0, neighbors.size() - 1); 
+			random_device rd;
+			mt19937 gen(rd());
+			uniform_int_distribution<> distribution(0, neighbors.size() - 1);
 			//stores random integers with range neighbors[0 -> lastNeighborIndex] in ``distribution` variable 
 
 			//cout << distribution(gen) << "\n"; 
@@ -539,27 +546,95 @@ public:
 			int weightToRandomlyChosenNeighbor = findEdgeWeight(currentVertex, randomlyChosenNeighbor);
 
 			totalPathWeight += weightToRandomlyChosenNeighbor;
-			currentVertex = randomlyChosenNeighbor; 
-			
+			currentVertex = randomlyChosenNeighbor;
+
 			pathTaken += " " + currentVertex;
 
-			cout << "Moving along weight w = " << weightToRandomlyChosenNeighbor << 
-				" to neighbor " << currentVertex << "\n"; 
+			cout << "Moving along weight w = " << weightToRandomlyChosenNeighbor <<
+				" to neighbor " << currentVertex << "\n";
 
 		}
 
 		cout << "Path taken: " << pathTaken << "\n"; //this string COULD be returned in an overloaded version 
-													//of this function 
+		//of this function 
 		cout << "Total weight (distance) traveled: " << totalPathWeight << "\n";
 
-		return totalPathWeight; 
+		return totalPathWeight;
 	}
 
-	/*by "lazy", I might mean "greedy" (takes shortest path - IF vertex not already visited)*/
-	int takeLazyWalk_UntilSomeEnd(string startingVertex, string endingVertex)
+	/*
+	This is a BFS algorithm with two additions: 
+	1) A boolean is used to verify whether or not ANY path from start to end is found (may not be if "weakly-connected")
+	
+	2) An std::unordered_map of successor vertices to predecessor vertices is used to keep track of the path taken (a bit tricky) 
+	@return the total weight of the path
+	*/
+	int traverseShortestPath_assumingEqualWeightPaths(string startingVertex, string endingVertex)
 	{
+		queue<string> traversalQ;
+		traversalQ.push(startingVertex); 
 
+		vector<string> path; 
+
+		set<string> alreadyVisited = { startingVertex }; 
+
+		bool pathFound = false; 
+
+		unordered_map<string, string> successorToPredecessorMap; 
+		//ex: if we take an edge from vertex "A" to "B"
+		//successorToPredecessorMap["B"] = "A"
+
+
+		while (!traversalQ.empty() && pathFound == false)
+		{
+			string currentVertex = traversalQ.front(); 
+			traversalQ.pop();
+
+			vector<string> neighbors = getNeighborsOfVertex(currentVertex); 
+
+			for (auto& theNeighbor : neighbors)
+			{
+				if (alreadyVisited.find(theNeighbor) == alreadyVisited.end())
+
+				{
+					traversalQ.push(theNeighbor);
+					alreadyVisited.insert(theNeighbor);
+
+					successorToPredecessorMap[theNeighbor] = currentVertex;  //read: predecessor of theNeighbor is currentVertex 
+																//ex: B and A in the JPG image file 
+
+					if (theNeighbor == endingVertex)
+					{
+						pathFound = true;
+						break;
+					}
+				}
+			}
+		}
+
+		if (pathFound)
+		{
+			for (string at = endingVertex; at != startingVertex; at = successorToPredecessorMap[at]) //note the string-based loop
+			{
+				path.push_back(at); 
+			}
+
+			path.push_back(startingVertex); 
+
+			std::reverse(path.begin(), path.end());
+
+		}
+
+		for (auto& element : path)
+		{
+			cout << element << " ...";
+		}
+
+		cout << "\n\n";
+		return path.size() - 1; //no accounting for weights here 
+							//this will only find ONE POSSIBLE shortest path
 	}
+
 
 	/*Doesn't seem particularly well-suited to be a member func of this class
 	, but I wanted to remind myself of the meaning*/

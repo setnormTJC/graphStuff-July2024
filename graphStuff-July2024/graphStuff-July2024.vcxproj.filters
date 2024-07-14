@@ -15,16 +15,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="graph-July2024.cpp">
+    <ClCompile Include="variousIntroductoryGraphThings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Graph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="graphDemosContinued_Jul14.cpp">
+    <ClCompile Include="randomWalksInAGridGraph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ShortestPathDemo.cpp">
+    <ClCompile Include="ShortestUNWEIGHTEDPathDemo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -127,10 +127,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="graph-July2024.cpp" />
+    <ClCompile Include="variousIntroductoryGraphThings.cpp" />
     <ClCompile Include="Graph.cpp" />
-    <ClCompile Include="graphDemosContinued_Jul14.cpp" />
-    <ClCompile Include="ShortestPathDemo.cpp" />
+    <ClCompile Include="randomWalksInAGridGraph.cpp" />
+    <ClCompile Include="ShortestUNWEIGHTEDPathDemo.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graph.h" />
