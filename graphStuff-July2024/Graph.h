@@ -555,8 +555,25 @@ public:
 		return totalPathWeight; 
 	}
 
-	
+	/*by "lazy", I might mean "greedy" (takes shortest path - IF vertex not already visited)*/
+	int takeLazyWalk_UntilSomeEnd(string startingVertex, string endingVertex)
+	{
 
+	}
+
+	/*Doesn't seem particularly well-suited to be a member func of this class
+	, but I wanted to remind myself of the meaning*/
+	bool isClosedWalk(string startingVertex, string endingVertex)
+	{
+		return (startingVertex == endingVertex); 
+	}
+
+	bool isCycle(/*anything here?*/)
+	{
+		//return (isClosedWalk() && onlyVisitsEachVertexAlongPathOnce())
+
+		return false; //for the moment 
+	}
 
 	/*Does NOT take a starting vertex (as an arg)
 	Runs through the vector of vertices and calls scanBreadth for each
