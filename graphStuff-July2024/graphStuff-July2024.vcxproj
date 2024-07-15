@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="shortestPath-Dijkstra.cpp" />
     <ClCompile Include="variousIntroductoryGraphThings.cpp" />
     <ClCompile Include="Graph.cpp" />
     <ClCompile Include="randomWalksInAGridGraph.cpp" />

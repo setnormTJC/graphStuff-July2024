@@ -17,14 +17,13 @@
 
 using namespace std; 
 
-class Graph
-{
-};
+
 
 /*a simple graph class whose vertices are identified by INTEGER values (no strings like city names) */
 class UnweightedGraph
 {
 public: 
+
 	vector<int> vertices{};// = { 1, 2, 3, 4 }; 
 
 	vector<pair<int, int>> edges; /*= {
@@ -391,6 +390,7 @@ public:
 	(rather than the std::pair I used for the `SimpleGraph` class above*/
 	vector<WeightedEdge> edges;
 
+
 	/*NOTE: this function DOES "handle" loops
 	* - ex: if vertex A has an edge to itself, A will be returned
 	* as one of the neighbors of A
@@ -563,7 +563,7 @@ public:
 	}
 
 	/*
-	This is a BFS algorithm with two additions: 
+	This is a BFS algorithm (see `UnWeightedGraph`) with two additions: 
 	1) A boolean is used to verify whether or not ANY path from start to end is found (may not be if "weakly-connected")
 	
 	2) An std::unordered_map of successor vertices to predecessor vertices is used to keep track of the path taken (a bit tricky) 
@@ -636,18 +636,91 @@ public:
 	}
 
 
-	/*Doesn't seem particularly well-suited to be a member func of this class
-	, but I wanted to remind myself of the meaning*/
-	bool isClosedWalk(string startingVertex, string endingVertex)
+	void findDijkstraShortestPath(string startVertex, string targetVertex)
 	{
-		return (startingVertex == endingVertex); 
+		priority_queue < pair<int, string>, vector<pair<int, string>>, greater<pair<int, string>>> minHeap;
+					//the edge (pair of verts) //the "underlying container"  //the custom comparator 
+		
+		unordered_map<string, int> distanceMap; 
+		unordered_map<string, string> predecessorMap; 
+		unordered_set<string> visited; 
+
+
+		for (string theVertex : vertices)
+		{
+			distanceMap[theVertex] = numeric_limits<int>::max(); 		//init distances to "inf"
+			predecessorMap[theVertex] = "-1"; //assume that -1 will NEVER be the name of a vertex
+		}
+
+		distanceMap[startVertex] = 0; 
+
+		minHeap.push({ 0, startVertex });
+
+		while (!minHeap.empty())
+		{
+			string currentVertex = minHeap.top().second; 
+
+			minHeap.pop();
+
+			if (visited.find(currentVertex) != visited.end())
+			{
+				continue; //!
+			}
+			visited.insert(currentVertex); 
+
+			if (currentVertex == targetVertex)
+			{
+				break; //!
+			}
+
+			for (auto& theNeighbor : getNeighborsOfVertex(currentVertex))
+			{
+				string neighborVertex = theNeighbor;  //just sticking with GitHub copilot's approach here
+				int weight = findEdgeWeight(currentVertex, neighborVertex); 
+
+				if (distanceMap[currentVertex] + weight < distanceMap[neighborVertex])
+				{
+					distanceMap[neighborVertex] = distanceMap[currentVertex] + weight; 
+					predecessorMap[neighborVertex] = currentVertex; 
+					minHeap.push({ distanceMap[neighborVertex], neighborVertex });
+				}
+
+			}
+		}
+
+		cout << "Starting at vertex " << startVertex << ", the following is a map of shortest distances to given vertices: \n";
+		for (auto& pair : distanceMap)
+		{
+			cout << pair.first << "\t" << pair.second << endl; 
+		}
+
+		cout << "ONE POSSIBLE path of minimal distance/weight for those vertices are : \n";
+
+		for (auto& theVertex : vertices)
+		{
+			cout << "\n";
+			printAMinimalDistancePath(startVertex, theVertex, predecessorMap);
+		}
+		
 	}
 
-	bool isCycle(/*anything here?*/)
+	/*Called by the Dijkstra method (a member of WeightedUndirectedGraph) - does NONE of the "main work" of the algo*/
+	void printAMinimalDistancePath(string startVertex, string targetVertex, unordered_map<string, string> predecessorMap)
 	{
-		//return (isClosedWalk() && onlyVisitsEachVertexAlongPathOnce())
+		string currentKey = targetVertex;
 
-		return false; //for the moment 
+		string visitedVertices = targetVertex;
+		while(currentKey != startVertex)
+		{
+			visitedVertices +=  ">-" + predecessorMap[currentKey]; //goofy >- because reverse will be used 
+
+			currentKey = predecessorMap[currentKey]; 
+
+		}
+
+		std::reverse(visitedVertices.begin(), visitedVertices.end());
+
+		cout << visitedVertices << endl; 
 	}
 
 	/*Does NOT take a starting vertex (as an arg)

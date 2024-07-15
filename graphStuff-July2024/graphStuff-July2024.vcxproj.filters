@@ -27,6 +27,9 @@
     <ClCompile Include="ShortestUNWEIGHTEDPathDemo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="shortestPath-Dijkstra.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graph.h">
