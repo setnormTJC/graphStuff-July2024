@@ -658,6 +658,7 @@ public:
 
 	}
 
+	/*allows revisiting*/
 	void takeRandomKnightWalk(PairOfIntegers_Vertex startVertex, PairOfIntegers_Vertex endVertex)
 	{
 		if (std::find(vertices.begin(), vertices.end(), startVertex) == vertices.end())
@@ -719,7 +720,10 @@ public:
 		}
 	}
 
-	void takeKnightsTour(PairOfIntegers_Vertex startVertex)
+	/*does NOT allow revisiting 
+	returns true if tour was successful
+	*/
+	bool takeKnightsTour(PairOfIntegers_Vertex startVertex)
 	{
 		vector<PairOfIntegers_Vertex> visitedVertices; 
 
@@ -736,29 +740,34 @@ public:
 
 		while (visitedVertices.size() < vertices.size())
 		{
-			vector<PairOfIntegers_Vertex> allowedMoves = generateAllowedKnightMoves(currentVertex);
+			//vector<PairOfIntegers_Vertex> allowedMoves = generateAllowedKnightMoves(currentVertex);
 
+			auto allowedMoves = generateAllowedTOURMoves(currentVertex, visitedVertices);
 
 			//don't revisit previously-visited position
-			for (auto& theVertex : allowedMoves)
-			{
-				auto locOfTheVertex = std::find(visitedVertices.begin(), visitedVertices.end(), theVertex);
+			//for (auto& theVertex : allowedMoves)
+			//{
+			//	auto locOfTheVertex = std::find(visitedVertices.begin(), visitedVertices.end(), theVertex);
 
-				if (locOfTheVertex != visitedVertices.end()) 
-				{
-					//allowedMoves.erase(locOfTheVertex);
-					std::erase(allowedMoves, theVertex); 
-				}
-			}
+			//	if (locOfTheVertex != visitedVertices.end()) 
+			//	{
+			//		//allowedMoves.erase(locOfTheVertex);
+			//		std::erase(allowedMoves, theVertex); 
+			//	}
+			//}
 
 			if (allowedMoves.size() == 0)
 			{
-				cout << "Dead end, dead end, dead end!\n";
-				return; 
+				//cout << "Dead end, dead end, dead end!\n";
+				//backtrack how?
+
+				return false; 
 			}
 
 		
-			uniform_int_distribution<int> distribution(0, allowedMoves.size() - 1);
+			uniform_int_distribution<int> distribution(0, allowedMoves.size() - 1); 
+			//NOTE: if second arg to `distribution` == 0 - 1 (ZERO allowed moves) 
+			//uniform_int_distribution will kill program without the `if` above
 
 			int randomNeighborIndex = distribution(gen);
 
@@ -780,14 +789,16 @@ public:
 
 			gridDrawing[currentVertex.x - 1][currentVertex.y - 1] = characterOfCurrentPosition;
 
-			this_thread::sleep_for(chrono::milliseconds(1000)); //Change to 50 for a good time ...
-			system("cls");
-			drawGrid(gridDrawing);
+			//this_thread::sleep_for(chrono::milliseconds(1000)); //Change to 50 for a good time ...
+			//system("cls");
+			//drawGrid(gridDrawing);
 
 			if (visitedVertices.size() == vertices.size())
 			{
-				cout << "Visited all vertices in " << totalStepCount << " steps.\n";
+				//cout << "Visited all vertices in " << totalStepCount << " steps.\n";
 				drawGrid(gridDrawing);
+
+				return true; 
 			}
 
 		}
