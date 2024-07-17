@@ -12,8 +12,13 @@
 #include<algorithm> //for std::set_intersection -> used for `isSubGraphOf`
 #include <unordered_set>
 #include <map>
-#include <random>
+#include <random> //for random walkin'
 #include <unordered_map>
+
+#include<iomanip> //for drawing GridGraph
+
+#include<thread> 
+#include<chrono> //thread and chrono for platform-independent pausing while taking random walk and displaying updated grid
 
 using namespace std; 
 
@@ -26,11 +31,16 @@ public:
 
 	vector<int> vertices{};// = { 1, 2, 3, 4 }; 
 
-	vector<pair<int, int>> edges; /*= {
-		{1, 2}, {1, 3}, {1, 4},
-		{2, 3}, {2, 4},
-				{3, 4}
-	};*/
+
+
+	vector<pair<int, int>> edges; 
+	// ex= {
+//	{1, 2}, {1, 3}, {1, 4},
+//	{2, 3}, {2, 4},
+//			{3, 4}
+//};*/
+
+
 
 	/*assumes an UNDIRECTED graph*/
 	bool areAdjacentEdges(int vertex1, int vertex2)
@@ -374,21 +384,299 @@ public:
 
 };
 
+/*a pair of integers - x and y*/
+struct PairOfIntegers_Vertex
+{
+	int x; 
+	int y; 
+	
+	PairOfIntegers_Vertex(int x, int y)
+		:x(x), y(y) {}; 
+
+	friend ostream& operator << (ostream& os, const PairOfIntegers_Vertex& pair);
+
+	bool operator == (const PairOfIntegers_Vertex& other)
+	{
+		return this->x == other.x && this->y == other.y;
+	}
+
+	bool isSameVertex(const PairOfIntegers_Vertex& other)
+	{
+		return this->x == other.x && this->y == other.y; 
+	}
+
+};
+
+ostream& operator << (ostream& os, const PairOfIntegers_Vertex& pair)
+{
+	os << "(" << pair.x << " , " << pair.y << ")";
+
+	return os;
+}
+
+struct GridEdge
+{
+	PairOfIntegers_Vertex firstVertex;
+	PairOfIntegers_Vertex secondVertex;
+
+	GridEdge(PairOfIntegers_Vertex firstVertex, PairOfIntegers_Vertex secondVertex)
+		:firstVertex(firstVertex), secondVertex(secondVertex) {};
+
+};
+
+class GridGraph
+{
+public: 
+
+	vector<PairOfIntegers_Vertex> vertices;  //tuple or 3Dpointstruct  if desired 
+
+	vector<GridEdge> gridEdges; //not vector
+
+	/*@param dimensionOfSquareGrid - returns a grid graph (AKA: "lattice graph") of `d^2` vertices 
+	and 2d^2 - 2d edges (see https://mathworld.wolfram.com/GridGraph.html)
+	ex: if user supplies an argument of 2, the following graph is made: 
+	vertices = 
+	{
+		{2, 1}, {2, 2}
+		{1, 1}, {1, 2}
+	}
+
+	edges = 
+	{
+		{{1, 2}, {2, 2}},   //edge connecting (1, 2) to (2, 2) 
+		{{2, 2}, {2, 1}}, 
+		{{2, 1}, {1, 1}}, 
+		{{1, 1}, {1, 2}}
+	}
+	*/
+	GridGraph(int dimensionOfSquareGrid)
+	{
+		//vertices first
+		for (int x = 1; x <= dimensionOfSquareGrid; x++)
+		{
+			for (int y = 1; y <= dimensionOfSquareGrid; y++)
+			{
+				vertices.push_back({x, y});
+			}
+		}
+
+		//edges (pair of two pairs of integers) next: 
+		
+		//horizontal edges first: 
+		for (int y = 1; y <= dimensionOfSquareGrid; y++)
+		{
+			for (int x = 1; x < dimensionOfSquareGrid; x++)
+			{
+				PairOfIntegers_Vertex firstVertex(x, y) ;
+				PairOfIntegers_Vertex secondVertex(x + 1, y);
+				GridEdge theGridEdge(firstVertex, secondVertex); 
+
+				gridEdges.push_back(theGridEdge);
+			}
+
+		}
+
+		
+		//now vertical edges:
+		for (int x = 1; x <= dimensionOfSquareGrid; x++)
+		{
+			for (int y = 1; y < dimensionOfSquareGrid; y++)
+			{
+				PairOfIntegers_Vertex firstVertex(x, y);
+				PairOfIntegers_Vertex secondVertex(x, y +  1);
+
+				GridEdge theGridEdge(firstVertex, secondVertex);
+
+				gridEdges.push_back(theGridEdge);
+			}
+		}
+	}
+
+	vector<PairOfIntegers_Vertex> getNeighborsOfVertex(PairOfIntegers_Vertex vertexOfInterest)
+	{
+		if (std::find(vertices.begin(), vertices.end(), vertexOfInterest) == vertices.end())
+		{
+			cout << "The vertex " << vertexOfInterest << " is not present in the graph.\n";
+			return vector<PairOfIntegers_Vertex>(); //empty vertex of pairs
+
+		}
+		vector<PairOfIntegers_Vertex> neighbors; 
+		//max possible neighbor count: 4 (ex: (2, 2) has (1, 2), (2, 3), (3, 2) and (2, 1)  
+		
+		//loop through edges: 
+		for (auto& theVertex : vertices)
+		{
+			//four scenarios on a 2 x 2 grid make a neighbor: 
+
+			//first - same x value, y is shifted down 1 unit 
+			if (theVertex.x == vertexOfInterest.x && theVertex.y - 1 == vertexOfInterest.y)
+			{
+				neighbors.push_back(theVertex); 
+			}
+			
+			//second - same x, y + 1
+			if (theVertex.x == vertexOfInterest.x && theVertex.y + 1 == vertexOfInterest.y)
+			{
+				neighbors.push_back(theVertex);
+			}
+
+			//third: x leftshifted 1 unit, same y 
+			if (theVertex.x - 1 == vertexOfInterest.x && theVertex.y == vertexOfInterest.y)
+			{
+				neighbors.push_back(theVertex); 
+			}
+
+			//fourth x shifted right 1 unit, same y
+			if (theVertex.x + 1 == vertexOfInterest.x && theVertex.y == vertexOfInterest.y)
+			{
+				neighbors.push_back(theVertex);
+			}
+
+		}
+		return neighbors;
+	}
+
+	void takeRandomWalk(PairOfIntegers_Vertex startVertex, PairOfIntegers_Vertex endVertex)
+	{
+		if (std::find(vertices.begin(), vertices.end(), startVertex) == vertices.end())
+		{
+			cout << "starting vertex = " << startVertex << " is not present in the graph.\n";
+			return; 
+		}
+
+		if (std::find(vertices.begin(), vertices.end(), endVertex) == vertices.end())
+		{
+			cout << "ending vertex = " << endVertex << " is not present in the graph.\n";
+			return;
+		}
+
+		PairOfIntegers_Vertex currentVertex = startVertex; 
+
+		random_device rd;
+		std::mt19937 gen(rd());
+
+		auto gridDrawing = getInitialGridDrawing(); 
+
+		int stepCountForCharacters = 0; 
+		size_t totalStepCount = 0; 
+		while (!currentVertex.isSameVertex(endVertex))
+		{
+			auto neighbors = getNeighborsOfVertex(currentVertex);
+
+			uniform_int_distribution<int> distribution(0, neighbors.size() - 1);
+			
+			int randomNeighborIndex = distribution(gen); 
+
+			PairOfIntegers_Vertex randomlyChosenNeighbor = neighbors[randomNeighborIndex];
+
+			totalStepCount++; 
+			//cout << "\nStep " << totalStepCount << " - moving to vertex = " << randomlyChosenNeighbor << "\n";
+			currentVertex = randomlyChosenNeighbor; 
+
+			stepCountForCharacters++; 
+			if (stepCountForCharacters > 26)
+			{
+				stepCountForCharacters = 1; 
+			}
+
+			char characterOfCurrentPosition = (64 + stepCountForCharacters); //wrap back around to A once 90 is hit 
+			
+			gridDrawing[currentVertex.x - 1][currentVertex.y - 1] = characterOfCurrentPosition;
+
+			this_thread::sleep_for(chrono::milliseconds(1000)); //Change to 50 for a good time ...
+			system("cls"); 
+			drawGrid(gridDrawing);
+
+			if (currentVertex.isSameVertex(endVertex))
+			{
+				cout << "Reached target in " << totalStepCount << " steps.\n";
+				drawGrid(gridDrawing);
+			}
+		}
+	}
+
+	vector<vector<char>> getInitialGridDrawing()
+	{
+		int squareBoxDimension = (int)sqrt(vertices.size());
+		//draw top line of grid box: 
+
+		vector<vector<char>> characterGrid;
+		//char characterGrid[squareBoxDimension][squareBoxDimension];
+		for (int y = squareBoxDimension; y > 0; y--)
+		{
+			vector<char> currentRow;
+			for (int x = 1; x <= squareBoxDimension; x++)
+			{
+				currentRow.push_back(' ');
+			}
+			characterGrid.push_back(currentRow);
+		}
+
+		return characterGrid;
+}
+	
+	void drawGrid(vector<vector<char>> characterGrid)
+	{
+		int squareBoxDimension = characterGrid.at(0).size();
+
+		cout << " " << setw(squareBoxDimension + 1) << setfill('=') << "\n";
+		for (auto& row : characterGrid)
+		{
+			cout << "|";
+			for (auto& character : row)
+			{
+				cout << character;
+			}
+			cout << "|\n";
+		}
+		cout << " " << setw(squareBoxDimension + 1) << setfill('=') << "\n";
+		cout << "\n";
+	}
+
+};
+
+
+
+
 struct WeightedEdge
 {
 	string vertex1; 
 	string vertex2; 
 	int weight; 
+
+	bool operator == (const WeightedEdge& otherWeightedEdge)
+	{
+		return
+			(this->vertex1 == otherWeightedEdge.vertex1
+				&&
+				this->vertex2 == otherWeightedEdge.vertex2
+				&&
+				this->weight == otherWeightedEdge.weight);
+
+	}
 };
+
+
 
 class WeightedUndirectedGraph
 {
 public:
-	vector<string> vertices{};// = { 1, 2, 3, 4 }; 
+	vector<string> vertices{};// ex = { 1, 2, 3, 4 }; 
 
 	/*Weighted edge is a struct of three ints - similar to a tuple
 	(rather than the std::pair I used for the `SimpleGraph` class above*/
 	vector<WeightedEdge> edges;
+
+
+	/*
+	@param squareGridDimension - 
+	this constructor will return a square grid of points of a graph with all edge weights = 1
+	EX: if the arg. = 2
+	vertices = {1, 2}
+	edges = {
+		{1, 2}
+	}
+	*/
 
 
 	/*NOTE: this function DOES "handle" loops
@@ -635,7 +923,8 @@ public:
 							//this will only find ONE POSSIBLE shortest path
 	}
 
-
+	/*finds shortest path from start to target AND certain other vertices in graph
+	(dependent on the depth of these vertices relative to `targetVertex`)*/
 	void findDijkstraShortestPath(string startVertex, string targetVertex)
 	{
 		priority_queue < pair<int, string>, vector<pair<int, string>>, greater<pair<int, string>>> minHeap;
@@ -694,14 +983,14 @@ public:
 			cout << pair.first << "\t" << pair.second << endl; 
 		}
 
-		cout << "ONE POSSIBLE path of minimal distance/weight for those vertices are : \n";
+cout << "ONE POSSIBLE path of minimal distance/weight for those vertices are : \n";
 
-		for (auto& theVertex : vertices)
-		{
-			cout << "\n";
-			printAMinimalDistancePath(startVertex, theVertex, predecessorMap);
-		}
-		
+for (auto& theVertex : vertices)
+{
+	cout << "\n";
+	printAMinimalDistancePath(startVertex, theVertex, predecessorMap);
+}
+
 	}
 
 	/*Called by the Dijkstra method (a member of WeightedUndirectedGraph) - does NONE of the "main work" of the algo*/
@@ -710,31 +999,135 @@ public:
 		string currentKey = targetVertex;
 
 		string visitedVertices = targetVertex;
-		while(currentKey != startVertex)
+		while (currentKey != startVertex)
 		{
-			visitedVertices +=  ">-" + predecessorMap[currentKey]; //goofy >- because reverse will be used 
+			visitedVertices += ">-" + predecessorMap[currentKey]; //goofy >- because reverse will be used 
 
-			currentKey = predecessorMap[currentKey]; 
+			currentKey = predecessorMap[currentKey];
 
 		}
 
 		std::reverse(visitedVertices.begin(), visitedVertices.end());
 
-		cout << visitedVertices << endl; 
+		cout << visitedVertices << endl;
 	}
 
 	/*Does NOT take a starting vertex (as an arg)
 	Runs through the vector of vertices and calls scanBreadth for each
 	*/
-	//void fullBreadthFirstScan()
-	//{
-	//	for (auto& theVertex : vertices)
-	//	{
-	//		cout << "Starting at vertex = " << theVertex
-	//			<< "-BFS visits vertices in the following order: \n";
-	//		scanBreadth_givenStartingVertex(theVertex);
-	//	}
-	//}
+	void fullBreadthFirstScan()
+	{
+		for (auto& theVertex : vertices)
+		{
+			cout << "Starting at vertex = " << theVertex
+				<< "-BFS visits vertices in the following order: \n";
+			scanBreadth(theVertex);
+		}
+	}
+
+	void removeVertex_andAnyAssociatedEdges(string vertexToRemove)
+	{
+		//simple bit: 
+		auto locationOfVertexToRemove = std::find(vertices.begin(), vertices.end(), vertexToRemove);
+		if (locationOfVertexToRemove != vertices.end())
+		{
+			vertices.erase(locationOfVertexToRemove);
+			//cout << "Updated number of vertices: " << vertices.size() << "\n";
+
+			//now erase all edges incident on the vertex (more of a chore than I thought ...) 
+			auto edgeIterator = edges.begin();
+			int numberOfEdgesRemoved = 0;
+			while (edgeIterator != edges.end()) //for loop running over size of edges will NOT work here 
+				//(since erasing updates size) 
+			{
+				if (edgeIterator->vertex1 == vertexToRemove || edgeIterator->vertex2 == vertexToRemove)
+				{
+					edgeIterator = edges.erase(edgeIterator); //interesting approach here
+					numberOfEdgesRemoved++;
+				}
+
+				else
+				{
+					++edgeIterator;
+				}
+			}
+
+			cout << "Successfully removed vertex " << vertexToRemove
+				<< " and its " << numberOfEdgesRemoved << " incident edges.\n";
+		}
+
+		else
+		{
+			cout << "The vertex " << vertexToRemove << " is not present in the graph\n";
+		}
+
+
+
+	}
+
+
+	void addVertex(string vertexToAdd)
+	{
+		vertices.push_back(vertexToAdd);
+	}
+
+	/*This method will assume that the two supplied vertices ARE present in the graph
+	If not, call `addVertex` a time or two first.
+	*/
+	void addEdge(string firstVertex, string secondVertex, int weight)
+	{
+		//confirm that both first and secondVertex are present 
+		if (std::find(vertices.begin(), vertices.end(), firstVertex) == vertices.end())
+		{
+			cout << "The vertex " << firstVertex << " is not present - call `addVertex(" << firstVertex << ") first.\n";
+			return; 
+		}
+
+		if (std::find(vertices.begin(), vertices.end(), secondVertex) ==  vertices.end())
+		{
+			cout << "The vertex " << secondVertex << " is not present - call `addVertex(" << secondVertex << ") first.\n";
+			return; //a bit goofy for the user with two returns here
+		}
+
+		edges.push_back({ firstVertex, secondVertex, weight });
+
+	}
+
+	multimap<int, string> mapDegreesOfAllVertices()
+	{
+		multimap<int, string> mapOfDegreesToVertices;
+		
+
+		for (auto& theVertex : vertices)
+		{
+			auto neighbors = getNeighborsOfVertex(theVertex);
+			int degreeCount = neighbors.size();
+
+			mapOfDegreesToVertices.insert({ degreeCount, theVertex });
+		}
+
+		return mapOfDegreesToVertices;
+	}
+
+	/*graph is complete if every vertex is connected to every other vertex - except itself (I think)
+	NOTE that this is an alternative to the "combinatorics" approach used in `UnWeightedGraph` class above*/
+	bool isCompleteGraph()
+	{
+		auto mapOfDegreesToVertices = mapDegreesOfAllVertices(); 
+
+		for (auto& thePair : mapOfDegreesToVertices)
+		{
+			if (thePair.first != vertices.size() - 1)
+			{
+				cout << thePair.second << " only connects to " << thePair.first << " of " << vertices.size() - 1
+					<< " vertices - not a complete graph\n";
+					//only doing one print statement
+				return false; 
+			}
+		}
+
+		return true;
+	}
 
 
 
