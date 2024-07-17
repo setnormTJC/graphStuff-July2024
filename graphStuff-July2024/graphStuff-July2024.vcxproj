@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClCompile Include="July15-continuingGraphs.cpp" />
     <ClCompile Include="July16-yetMoreGraphPlay-WithGrids.cpp" />
+    <ClCompile Include="July17-KnightsWalk.cpp" />
     <ClCompile Include="shortestPath-Dijkstra.cpp" />
     <ClCompile Include="variousIntroductoryGraphThings.cpp" />
     <ClCompile Include="randomWalksInAGridGraph.cpp" />

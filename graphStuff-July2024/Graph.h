@@ -424,6 +424,7 @@ struct GridEdge
 
 };
 
+/*This is a SQUARE grid graph - and it is 2D*/
 class GridGraph
 {
 public: 
@@ -538,6 +539,7 @@ public:
 
 	void takeRandomWalk(PairOfIntegers_Vertex startVertex, PairOfIntegers_Vertex endVertex)
 	{
+		
 		if (std::find(vertices.begin(), vertices.end(), startVertex) == vertices.end())
 		{
 			cout << "starting vertex = " << startVertex << " is not present in the graph.\n";
@@ -593,6 +595,203 @@ public:
 				drawGrid(gridDrawing);
 			}
 		}
+	}
+
+	vector<PairOfIntegers_Vertex> generateAllowedKnightMoves(PairOfIntegers_Vertex startVertex)
+	{
+		vector<PairOfIntegers_Vertex> all8Moves; 
+
+		PairOfIntegers_Vertex firstMove = { startVertex.x + 2, startVertex.y + 1 }; //right 2 spaces, up 1
+		PairOfIntegers_Vertex secondMove = { startVertex.x + 1, startVertex.y + 2 }; //right 1 spaces, up 2
+		PairOfIntegers_Vertex thirdMove = { startVertex.x - 2, startVertex.y - 1 }; //left 2, down 1
+		PairOfIntegers_Vertex fourthMove = { startVertex.x - 1, startVertex.y - 2 }; //left 1, down 2
+
+		PairOfIntegers_Vertex fifthMove = { startVertex.x + 2, startVertex.y - 1 }; //etc.
+		PairOfIntegers_Vertex sixthMove = { startVertex.x + 1, startVertex.y - 2 };
+		PairOfIntegers_Vertex seventhMove = { startVertex.x - 2, startVertex.y + 1 };
+		PairOfIntegers_Vertex eighthMove = { startVertex.x - 1, startVertex.y + 2 };
+
+		all8Moves.push_back(firstMove); 
+		all8Moves.push_back(secondMove); 
+		all8Moves.push_back(thirdMove);
+		all8Moves.push_back(fourthMove);
+
+		all8Moves.push_back(fifthMove);
+		all8Moves.push_back(sixthMove);
+		all8Moves.push_back(seventhMove);
+		all8Moves.push_back(eighthMove);
+
+		vector<PairOfIntegers_Vertex> theAllowedMoves;
+
+		int dimensionOfSquareGrid = (int)sqrt(vertices.size());
+
+		for (auto& theMove : all8Moves)
+		{
+			if (theMove.x > 0 && theMove.x <= dimensionOfSquareGrid
+				&&
+				theMove.y > 0 && theMove.y <= dimensionOfSquareGrid)
+			{
+				theAllowedMoves.push_back(theMove); 
+			}
+		}
+
+		return theAllowedMoves; 
+	}
+
+
+	vector<PairOfIntegers_Vertex> generateAllowedTOURMoves(PairOfIntegers_Vertex startVertex, 
+		vector< PairOfIntegers_Vertex> & alreadyVisited)
+	{
+		auto allowedBaseMoves = generateAllowedKnightMoves(startVertex); 
+
+		vector<PairOfIntegers_Vertex> allowedTOURmoves; 
+
+		for (auto& theMove : allowedBaseMoves)
+		{
+			if (std::find(alreadyVisited.begin(), alreadyVisited.end(), theMove) == alreadyVisited.end())
+			{
+				allowedTOURmoves.push_back(theMove);
+			}
+		}
+
+		return allowedTOURmoves;
+
+	}
+
+	void takeRandomKnightWalk(PairOfIntegers_Vertex startVertex, PairOfIntegers_Vertex endVertex)
+	{
+		if (std::find(vertices.begin(), vertices.end(), startVertex) == vertices.end())
+		{
+			cout << "starting vertex = " << startVertex << " is not present in the graph.\n";
+			return;
+		}
+
+		if (std::find(vertices.begin(), vertices.end(), endVertex) == vertices.end())
+		{
+			cout << "ending vertex = " << endVertex << " is not present in the graph.\n";
+			return;
+		}
+
+		PairOfIntegers_Vertex currentVertex = startVertex;
+
+		random_device rd;
+		std::mt19937 gen(rd());
+
+		auto gridDrawing = getInitialGridDrawing();
+
+		int stepCountForCharacters = 0;
+		size_t totalStepCount = 0;
+		while (!currentVertex.isSameVertex(endVertex))
+		{
+			auto neighbors = generateAllowedKnightMoves(currentVertex); 
+
+			uniform_int_distribution<int> distribution(0, neighbors.size() - 1);
+
+
+			int randomNeighborIndex = distribution(gen);
+
+			PairOfIntegers_Vertex randomlyChosenNeighbor = neighbors[randomNeighborIndex];
+
+			totalStepCount++;
+			//cout << "\nStep " << totalStepCount << " - moving to vertex = " << randomlyChosenNeighbor << "\n";
+			currentVertex = randomlyChosenNeighbor;
+
+			stepCountForCharacters++;
+			if (stepCountForCharacters > 26)
+			{
+				stepCountForCharacters = 1;
+			}
+
+			char characterOfCurrentPosition = (64 + stepCountForCharacters); //wrap back around to A once 90 is hit 
+
+			gridDrawing[currentVertex.x - 1][currentVertex.y - 1] = characterOfCurrentPosition;
+
+			this_thread::sleep_for(chrono::milliseconds(1000)); //Change to 50 for a good time ...
+			system("cls");
+			drawGrid(gridDrawing);
+
+			if (currentVertex.isSameVertex(endVertex))
+			{
+				cout << "Reached target in " << totalStepCount << " steps.\n";
+				drawGrid(gridDrawing);
+			}
+
+		}
+	}
+
+	void takeKnightsTour(PairOfIntegers_Vertex startVertex)
+	{
+		vector<PairOfIntegers_Vertex> visitedVertices; 
+
+		PairOfIntegers_Vertex currentVertex = startVertex; 
+		visitedVertices.push_back(currentVertex);
+
+		random_device rd;
+		std::mt19937 gen(rd());
+
+		auto gridDrawing = getInitialGridDrawing();
+
+		int stepCountForCharacters = 0;
+		size_t totalStepCount = 0;
+
+		while (visitedVertices.size() < vertices.size())
+		{
+			vector<PairOfIntegers_Vertex> allowedMoves = generateAllowedKnightMoves(currentVertex);
+
+
+			//don't revisit previously-visited position
+			for (auto& theVertex : allowedMoves)
+			{
+				auto locOfTheVertex = std::find(visitedVertices.begin(), visitedVertices.end(), theVertex);
+
+				if (locOfTheVertex != visitedVertices.end()) 
+				{
+					//allowedMoves.erase(locOfTheVertex);
+					std::erase(allowedMoves, theVertex); 
+				}
+			}
+
+			if (allowedMoves.size() == 0)
+			{
+				cout << "Dead end, dead end, dead end!\n";
+				return; 
+			}
+
+		
+			uniform_int_distribution<int> distribution(0, allowedMoves.size() - 1);
+
+			int randomNeighborIndex = distribution(gen);
+
+			PairOfIntegers_Vertex randomlyChosenNeighbor = allowedMoves[randomNeighborIndex];
+
+			totalStepCount++;
+			//cout << "\nStep " << totalStepCount << " - moving to vertex = " << randomlyChosenNeighbor << "\n";
+			currentVertex = randomlyChosenNeighbor;
+
+			visitedVertices.push_back(currentVertex);
+
+			stepCountForCharacters++;
+			if (stepCountForCharacters > 26)
+			{
+				stepCountForCharacters = 1;
+			}
+
+			char characterOfCurrentPosition = (64 + stepCountForCharacters); //wrap back around to A once 90 is hit 
+
+			gridDrawing[currentVertex.x - 1][currentVertex.y - 1] = characterOfCurrentPosition;
+
+			this_thread::sleep_for(chrono::milliseconds(1000)); //Change to 50 for a good time ...
+			system("cls");
+			drawGrid(gridDrawing);
+
+			if (visitedVertices.size() == vertices.size())
+			{
+				cout << "Visited all vertices in " << totalStepCount << " steps.\n";
+				drawGrid(gridDrawing);
+			}
+
+		}
+
 	}
 
 	vector<vector<char>> getInitialGridDrawing()

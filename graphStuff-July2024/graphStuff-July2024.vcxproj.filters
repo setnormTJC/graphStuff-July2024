@@ -33,6 +33,9 @@
     <ClCompile Include="July16-yetMoreGraphPlay-WithGrids.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="July17-KnightsWalk.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graph.h">
