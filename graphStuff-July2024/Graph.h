@@ -427,26 +427,26 @@ struct GridEdge
 /*This is a SQUARE grid graph - and it is 2D*/
 class GridGraph
 {
-public: 
+public:
 
 	vector<PairOfIntegers_Vertex> vertices;  //tuple or 3Dpointstruct  if desired 
 
 	vector<GridEdge> gridEdges; //not vector
 
-	/*@param dimensionOfSquareGrid - returns a grid graph (AKA: "lattice graph") of `d^2` vertices 
+	/*@param dimensionOfSquareGrid - returns a grid graph (AKA: "lattice graph") of `d^2` vertices
 	and 2d^2 - 2d edges (see https://mathworld.wolfram.com/GridGraph.html)
-	ex: if user supplies an argument of 2, the following graph is made: 
-	vertices = 
+	ex: if user supplies an argument of 2, the following graph is made:
+	vertices =
 	{
 		{2, 1}, {2, 2}
 		{1, 1}, {1, 2}
 	}
 
-	edges = 
+	edges =
 	{
-		{{1, 2}, {2, 2}},   //edge connecting (1, 2) to (2, 2) 
-		{{2, 2}, {2, 1}}, 
-		{{2, 1}, {1, 1}}, 
+		{{1, 2}, {2, 2}},   //edge connecting (1, 2) to (2, 2)
+		{{2, 2}, {2, 1}},
+		{{2, 1}, {1, 1}},
 		{{1, 1}, {1, 2}}
 	}
 	*/
@@ -457,34 +457,34 @@ public:
 		{
 			for (int y = 1; y <= dimensionOfSquareGrid; y++)
 			{
-				vertices.push_back({x, y});
+				vertices.push_back({ x, y });
 			}
 		}
 
 		//edges (pair of two pairs of integers) next: 
-		
+
 		//horizontal edges first: 
 		for (int y = 1; y <= dimensionOfSquareGrid; y++)
 		{
 			for (int x = 1; x < dimensionOfSquareGrid; x++)
 			{
-				PairOfIntegers_Vertex firstVertex(x, y) ;
+				PairOfIntegers_Vertex firstVertex(x, y);
 				PairOfIntegers_Vertex secondVertex(x + 1, y);
-				GridEdge theGridEdge(firstVertex, secondVertex); 
+				GridEdge theGridEdge(firstVertex, secondVertex);
 
 				gridEdges.push_back(theGridEdge);
 			}
 
 		}
 
-		
+
 		//now vertical edges:
 		for (int x = 1; x <= dimensionOfSquareGrid; x++)
 		{
 			for (int y = 1; y < dimensionOfSquareGrid; y++)
 			{
 				PairOfIntegers_Vertex firstVertex(x, y);
-				PairOfIntegers_Vertex secondVertex(x, y +  1);
+				PairOfIntegers_Vertex secondVertex(x, y + 1);
 
 				GridEdge theGridEdge(firstVertex, secondVertex);
 
@@ -501,9 +501,9 @@ public:
 			return vector<PairOfIntegers_Vertex>(); //empty vertex of pairs
 
 		}
-		vector<PairOfIntegers_Vertex> neighbors; 
+		vector<PairOfIntegers_Vertex> neighbors;
 		//max possible neighbor count: 4 (ex: (2, 2) has (1, 2), (2, 3), (3, 2) and (2, 1)  
-		
+
 		//loop through edges: 
 		for (auto& theVertex : vertices)
 		{
@@ -512,9 +512,9 @@ public:
 			//first - same x value, y is shifted down 1 unit 
 			if (theVertex.x == vertexOfInterest.x && theVertex.y - 1 == vertexOfInterest.y)
 			{
-				neighbors.push_back(theVertex); 
+				neighbors.push_back(theVertex);
 			}
-			
+
 			//second - same x, y + 1
 			if (theVertex.x == vertexOfInterest.x && theVertex.y + 1 == vertexOfInterest.y)
 			{
@@ -524,7 +524,7 @@ public:
 			//third: x leftshifted 1 unit, same y 
 			if (theVertex.x - 1 == vertexOfInterest.x && theVertex.y == vertexOfInterest.y)
 			{
-				neighbors.push_back(theVertex); 
+				neighbors.push_back(theVertex);
 			}
 
 			//fourth x shifted right 1 unit, same y
@@ -539,11 +539,11 @@ public:
 
 	void takeRandomWalk(PairOfIntegers_Vertex startVertex, PairOfIntegers_Vertex endVertex)
 	{
-		
+
 		if (std::find(vertices.begin(), vertices.end(), startVertex) == vertices.end())
 		{
 			cout << "starting vertex = " << startVertex << " is not present in the graph.\n";
-			return; 
+			return;
 		}
 
 		if (std::find(vertices.begin(), vertices.end(), endVertex) == vertices.end())
@@ -552,41 +552,41 @@ public:
 			return;
 		}
 
-		PairOfIntegers_Vertex currentVertex = startVertex; 
+		PairOfIntegers_Vertex currentVertex = startVertex;
 
 		random_device rd;
 		std::mt19937 gen(rd());
 
-		auto gridDrawing = getInitialGridDrawing(); 
+		auto gridDrawing = getInitialGridDrawing();
 
-		int stepCountForCharacters = 0; 
-		size_t totalStepCount = 0; 
+		int stepCountForCharacters = 0;
+		size_t totalStepCount = 0;
 		while (!currentVertex.isSameVertex(endVertex))
 		{
 			auto neighbors = getNeighborsOfVertex(currentVertex);
 
 			uniform_int_distribution<int> distribution(0, neighbors.size() - 1);
-			
-			int randomNeighborIndex = distribution(gen); 
+
+			int randomNeighborIndex = distribution(gen);
 
 			PairOfIntegers_Vertex randomlyChosenNeighbor = neighbors[randomNeighborIndex];
 
-			totalStepCount++; 
+			totalStepCount++;
 			//cout << "\nStep " << totalStepCount << " - moving to vertex = " << randomlyChosenNeighbor << "\n";
-			currentVertex = randomlyChosenNeighbor; 
+			currentVertex = randomlyChosenNeighbor;
 
-			stepCountForCharacters++; 
+			stepCountForCharacters++;
 			if (stepCountForCharacters > 26)
 			{
-				stepCountForCharacters = 1; 
+				stepCountForCharacters = 1;
 			}
 
 			char characterOfCurrentPosition = (64 + stepCountForCharacters); //wrap back around to A once 90 is hit 
-			
+
 			gridDrawing[currentVertex.x - 1][currentVertex.y - 1] = characterOfCurrentPosition;
 
 			this_thread::sleep_for(chrono::milliseconds(1000)); //Change to 50 for a good time ...
-			system("cls"); 
+			system("cls");
 			drawGrid(gridDrawing);
 
 			if (currentVertex.isSameVertex(endVertex))
@@ -599,7 +599,7 @@ public:
 
 	vector<PairOfIntegers_Vertex> generateAllowedKnightMoves(PairOfIntegers_Vertex startVertex)
 	{
-		vector<PairOfIntegers_Vertex> all8Moves; 
+		vector<PairOfIntegers_Vertex> all8Moves;
 
 		PairOfIntegers_Vertex firstMove = { startVertex.x + 2, startVertex.y + 1 }; //right 2 spaces, up 1
 		PairOfIntegers_Vertex secondMove = { startVertex.x + 1, startVertex.y + 2 }; //right 1 spaces, up 2
@@ -611,8 +611,8 @@ public:
 		PairOfIntegers_Vertex seventhMove = { startVertex.x - 2, startVertex.y + 1 };
 		PairOfIntegers_Vertex eighthMove = { startVertex.x - 1, startVertex.y + 2 };
 
-		all8Moves.push_back(firstMove); 
-		all8Moves.push_back(secondMove); 
+		all8Moves.push_back(firstMove);
+		all8Moves.push_back(secondMove);
 		all8Moves.push_back(thirdMove);
 		all8Moves.push_back(fourthMove);
 
@@ -631,20 +631,20 @@ public:
 				&&
 				theMove.y > 0 && theMove.y <= dimensionOfSquareGrid)
 			{
-				theAllowedMoves.push_back(theMove); 
+				theAllowedMoves.push_back(theMove);
 			}
 		}
 
-		return theAllowedMoves; 
+		return theAllowedMoves;
 	}
 
 
-	vector<PairOfIntegers_Vertex> generateAllowedTOURMoves(PairOfIntegers_Vertex startVertex, 
-		vector< PairOfIntegers_Vertex> & alreadyVisited)
+	vector<PairOfIntegers_Vertex> generateAllowedTOURMoves(PairOfIntegers_Vertex startVertex,
+		vector< PairOfIntegers_Vertex>& alreadyVisited)
 	{
-		auto allowedBaseMoves = generateAllowedKnightMoves(startVertex); 
+		auto allowedBaseMoves = generateAllowedKnightMoves(startVertex);
 
-		vector<PairOfIntegers_Vertex> allowedTOURmoves; 
+		vector<PairOfIntegers_Vertex> allowedTOURmoves;
 
 		for (auto& theMove : allowedBaseMoves)
 		{
@@ -684,7 +684,7 @@ public:
 		size_t totalStepCount = 0;
 		while (!currentVertex.isSameVertex(endVertex))
 		{
-			auto neighbors = generateAllowedKnightMoves(currentVertex); 
+			auto neighbors = generateAllowedKnightMoves(currentVertex);
 
 			uniform_int_distribution<int> distribution(0, neighbors.size() - 1);
 
@@ -720,14 +720,14 @@ public:
 		}
 	}
 
-	/*does NOT allow revisiting 
+	/*does NOT allow revisiting
 	returns true if tour was successful
 	*/
-	bool takeKnightsTour(PairOfIntegers_Vertex startVertex)
+	bool attemptKnightsTour(PairOfIntegers_Vertex startVertex)
 	{
-		vector<PairOfIntegers_Vertex> visitedVertices; 
+		vector<PairOfIntegers_Vertex> visitedVertices;
 
-		PairOfIntegers_Vertex currentVertex = startVertex; 
+		PairOfIntegers_Vertex currentVertex = startVertex;
 		visitedVertices.push_back(currentVertex);
 
 		random_device rd;
@@ -761,11 +761,11 @@ public:
 				//cout << "Dead end, dead end, dead end!\n";
 				//backtrack how?
 
-				return false; 
+				return false;
 			}
 
-		
-			uniform_int_distribution<int> distribution(0, allowedMoves.size() - 1); 
+
+			uniform_int_distribution<int> distribution(0, allowedMoves.size() - 1);
 			//NOTE: if second arg to `distribution` == 0 - 1 (ZERO allowed moves) 
 			//uniform_int_distribution will kill program without the `if` above
 
@@ -798,7 +798,7 @@ public:
 				//cout << "Visited all vertices in " << totalStepCount << " steps.\n";
 				drawGrid(gridDrawing);
 
-				return true; 
+				return true;
 			}
 
 		}
@@ -823,8 +823,17 @@ public:
 		}
 
 		return characterGrid;
-}
-	
+	}
+
+
+
+	/*abandoned for now*/
+	bool takeKnightsTour_WithBackTracking(PairOfIntegers_Vertex currentVertex, vector<PairOfIntegers_Vertex>& visitedVertices)
+	{
+		return false;
+	}
+
+
 	void drawGrid(vector<vector<char>> characterGrid)
 	{
 		int squareBoxDimension = characterGrid.at(0).size();
