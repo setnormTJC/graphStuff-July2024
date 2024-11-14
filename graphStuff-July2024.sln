@@ -5,6 +5,8 @@ VisualStudioVersion = 17.9.34616.47
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "graphStuff-July2024", "graphStuff-July2024\graphStuff-July2024.vcxproj", "{D706F6CE-CF6E-4D7A-912A-497A06BA6111}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Playing with std_next_permutation", "Playing with std_next_permutation\Playing with std_next_permutation.vcxproj", "{16818ACF-59C9-4CB3-9945-C5291D1C662C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{D706F6CE-CF6E-4D7A-912A-497A06BA6111}.Release|x64.Build.0 = Release|x64
 		{D706F6CE-CF6E-4D7A-912A-497A06BA6111}.Release|x86.ActiveCfg = Release|Win32
 		{D706F6CE-CF6E-4D7A-912A-497A06BA6111}.Release|x86.Build.0 = Release|Win32
+		{16818ACF-59C9-4CB3-9945-C5291D1C662C}.Debug|x64.ActiveCfg = Debug|x64
+		{16818ACF-59C9-4CB3-9945-C5291D1C662C}.Debug|x64.Build.0 = Debug|x64
+		{16818ACF-59C9-4CB3-9945-C5291D1C662C}.Debug|x86.ActiveCfg = Debug|Win32
+		{16818ACF-59C9-4CB3-9945-C5291D1C662C}.Debug|x86.Build.0 = Debug|Win32
+		{16818ACF-59C9-4CB3-9945-C5291D1C662C}.Release|x64.ActiveCfg = Release|x64
+		{16818ACF-59C9-4CB3-9945-C5291D1C662C}.Release|x64.Build.0 = Release|x64
+		{16818ACF-59C9-4CB3-9945-C5291D1C662C}.Release|x86.ActiveCfg = Release|Win32
+		{16818ACF-59C9-4CB3-9945-C5291D1C662C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,7 +2,7 @@
 //
 //int main(int argc, char* argv)
 //{
-//	int squareGridDimension = 50; 
+//	int squareGridDimension = 10; 
 //	GridGraph threeBythreeGridGraph(squareGridDimension);
 //
 //	//PairOfIntegers_Vertex vertexOfInterest = { 3, 3 };

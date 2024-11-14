@@ -585,7 +585,7 @@ public:
 
 			gridDrawing[currentVertex.x - 1][currentVertex.y - 1] = characterOfCurrentPosition;
 
-			this_thread::sleep_for(chrono::milliseconds(1000)); //Change to 50 for a good time ...
+			this_thread::sleep_for(chrono::milliseconds(50)); //Change to 50 for a good time ...
 			system("cls");
 			drawGrid(gridDrawing);
 
@@ -707,7 +707,7 @@ public:
 
 			gridDrawing[currentVertex.x - 1][currentVertex.y - 1] = characterOfCurrentPosition;
 
-			this_thread::sleep_for(chrono::milliseconds(1000)); //Change to 50 for a good time ...
+			this_thread::sleep_for(chrono::milliseconds(10)); //Change to 50 for a good time ...
 			system("cls");
 			drawGrid(gridDrawing);
 
@@ -834,6 +834,8 @@ public:
 	}
 
 
+
+
 	void drawGrid(vector<vector<char>> characterGrid)
 	{
 		int squareBoxDimension = characterGrid.at(0).size();
@@ -880,9 +882,9 @@ struct WeightedEdge
 class WeightedUndirectedGraph
 {
 public:
-	vector<string> vertices{};// ex = { 1, 2, 3, 4 }; 
+	vector<string> vertices{};
 
-	/*Weighted edge is a struct of three ints - similar to a tuple
+	/*Weighted edge is a struct of two strings and an int - similar to a tuple
 	(rather than the std::pair I used for the `SimpleGraph` class above*/
 	vector<WeightedEdge> edges;
 
@@ -1212,6 +1214,8 @@ for (auto& theVertex : vertices)
 
 	}
 
+	private:
+
 	/*Called by the Dijkstra method (a member of WeightedUndirectedGraph) - does NONE of the "main work" of the algo*/
 	void printAMinimalDistancePath(string startVertex, string targetVertex, unordered_map<string, string> predecessorMap)
 	{
@@ -1226,11 +1230,13 @@ for (auto& theVertex : vertices)
 
 		}
 
-		std::reverse(visitedVertices.begin(), visitedVertices.end());
+		std::reverse(visitedVertices.begin(), visitedVertices.end()); 
+		//NOTE that this will print city names in reverse ... :)
 
 		cout << visitedVertices << endl;
 	}
 
+	public: 
 	/*Does NOT take a starting vertex (as an arg)
 	Runs through the vector of vertices and calls scanBreadth for each
 	*/
@@ -1312,6 +1318,8 @@ for (auto& theVertex : vertices)
 
 	}
 
+
+	/*Not certain this has no bugs ...*/
 	multimap<int, string> mapDegreesOfAllVertices()
 	{
 		multimap<int, string> mapOfDegreesToVertices;
@@ -1349,6 +1357,104 @@ for (auto& theVertex : vertices)
 	}
 
 
+	/*generate all possible paths, then find the one(s) of minimum weight*/
+	void bruteForceTSP_November14(string startingVertex)
+	{
+		set<string> possiblePaths; //using a set (not vector) to prevent duplicate paths 
+
+		//for (int i = 0; i < vertices.size(); ++i)
+		//{
+		while (possiblePaths.size() < (vertices.size())) //modify to (N - 1) !
+		{
+			string onePossiblePath;
+
+			auto neighborsOfStartVertex = getNeighborsOfVertex(startingVertex);
+
+			while (!neighborsOfStartVertex.empty())
+			{
+
+
+				possiblePaths.insert(onePossiblePath); //inserting duplicate will not increase set size
+			}
+
+		}
+//		}
+	}
+
+	/*
+	ABANDONED - for now
+	traverses all possible paths (by def, a "path" does visits each vertex only once)
+	Assumes (to some extent) that graph is COMPLETE 
+	for all paths, stores map of path and its total weight (distance) 
+	@return  the path (concatenated string, ex: Austin->Chicago->Boston->etc) 
+	and its weight (as std::pair)
+	*/
+	map<int, string> solveTSP_ByBruteForce(string startingVertex)
+	{
+		if (!isCompleteGraph())
+		{
+			cout << "Warning - graph is not complete -> might get stuck here ...";
+		}
+
+		map<int, string> pathsAndTheirWeights;
+
+		string currentVertex = startingVertex;
+
+		vector<string> alreadyVisited;// = { currentVertex };
+
+		random_device rd;
+		mt19937 engine(rd());
+
+		int totalPathWeight = 0;
+
+		string pathSoFar = startingVertex;
+
+		do
+		{
+			auto neighbors = getNeighborsOfVertex(currentVertex);
+
+			vector<string> nonvisitedNeighbors;
+			//remove previously-visted neighbors from consideration: 
+			for (auto& theNeighbor : neighbors)
+			{
+				if (std::find(neighbors.begin(), neighbors.end(), theNeighbor) == neighbors.end())
+				{
+					nonvisitedNeighbors.push_back(theNeighbor);
+				}
+			}
+
+
+			uniform_int_distribution<int> dist(0, neighbors.size() - 1);
+
+			//pick random neighbor from remainder
+
+			int chosenIndex = dist(engine);  //maybe the correct syntax
+
+			string chosenNeighbor = neighbors[chosenIndex];
+			//update currentVertex
+			alreadyVisited.push_back(chosenNeighbor);
+
+			totalPathWeight += findEdgeWeight(currentVertex, chosenNeighbor);
+
+			currentVertex = chosenNeighbor;
+
+			cout << "Moving to " << chosenNeighbor << "\n";
+			pathSoFar += "->" + chosenNeighbor;
+
+
+		} while (currentVertex != startingVertex);
+
+		pathsAndTheirWeights.insert({ totalPathWeight, pathSoFar });
+
+		return pathsAndTheirWeights;
+	}
+
+	//is it "greedy" or "lazy"? 
+	// Chooses to take shortest edge (excluding previously-visited vertices) at all steps 
+	void approximatelySolveTSP_WithGreed()
+	{
+
+	}
 
 };
 
