@@ -145,6 +145,50 @@ void printAllUNIQUEPermutations(vector<int>& nums)
     cout << "Count (N!): " << nums.size() << "! = " << permutations.size() << "\n";
 }
 
+
+/*a (recursive) method to generate all permutations of an array
+@param k -> things.size()
+*/
+template<typename T>
+void heapsAlgorithm(int k, vector<T>& things, vector<vector<T>>& permutationList)
+{
+
+    if (k == 1)
+    {
+        permutationList.push_back(things);
+    }
+
+    else
+    {
+        for (int i = 0; i < k; ++i)
+        {
+            heapsAlgorithm(k - 1, things, permutationList);
+
+            if (k % 2 == 0)
+            {
+                mySwap(things, i, k - 1);
+            }
+
+            else
+            {
+                mySwap(things, 0, k - 1);
+            }
+        }
+    }
+}
+
+
+template<typename T>
+auto generatePermutations_withHeapsAlgo(vector<T>& things)
+{
+    vector<vector<T>> permutationList;
+
+    heapsAlgorithm(things.size(), things, permutationList);
+
+    return permutationList;
+}
+
+
 int main()
 {
     srand(time(0)); 
@@ -163,6 +207,22 @@ int main()
         cout << "Permutation #" << permutationCount << " ";
         printVec(nums); 
         //cout << "}"
+    }
+
+    cout << "\n\n\n";
+    vector<int> numsAgain = { 1, 2, 3, 4, 5 };
+    vector<vector<int>> permutationList = generatePermutations_withHeapsAlgo(numsAgain);
+
+    //heapsAlgorithm(nums.size(), nums); 
+    std::sort(permutationList.begin(), permutationList.end());
+    //sorting for ease of comprehending permutations 
+    for (auto& permutation : permutationList)
+    {
+        for (auto& num : permutation)
+        {
+            cout << num << " ";
+        }
+        cout << "\n";
     }
     //printAllUNIQUEPermutations(nums); 
 

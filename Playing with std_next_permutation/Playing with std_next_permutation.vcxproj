@@ -24,6 +24,7 @@
     <ProjectGuid>{16818acf-59c9-4cb3-9945-c5291d1c662c}</ProjectGuid>
     <RootNamespace>Playingwithstdnextpermutation</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Playing with std_next_permutation AND Heap's algo</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

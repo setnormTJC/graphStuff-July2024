@@ -31,7 +31,7 @@ int main(int argc, char* argv)
 	//graphOfFourCities.isCompleteGraph()
 	string startCity = "Austin"; 
 	
-	srand(time(0));
+	//srand(time(0));
 
 	graphOfFourCities.bruteForceTSP_November14(startCity); 
 
