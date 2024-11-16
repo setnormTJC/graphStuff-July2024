@@ -39,6 +39,9 @@
     <ClCompile Include="TSP-Nov15.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="permutationsHeaderFile.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graph.h">

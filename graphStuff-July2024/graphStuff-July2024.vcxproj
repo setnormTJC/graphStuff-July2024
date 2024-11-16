@@ -134,6 +134,7 @@
     <ClCompile Include="July15-continuingGraphs.cpp" />
     <ClCompile Include="July16-yetMoreGraphPlay-WithGrids.cpp" />
     <ClCompile Include="July17-KnightsWalk.cpp" />
+    <ClCompile Include="permutationsHeaderFile.cpp" />
     <ClCompile Include="shortestPath-Dijkstra.cpp" />
     <ClCompile Include="TSP-Nov15.cpp" />
     <ClCompile Include="variousIntroductoryGraphThings.cpp" />
