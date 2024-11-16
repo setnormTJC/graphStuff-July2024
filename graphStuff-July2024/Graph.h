@@ -1372,6 +1372,52 @@ for (auto& theVertex : vertices)
 		cout << vertices.at(vertices.size() - 1) << "\n";
 	}
 
+	auto generatePossiblePaths_ForTSP(string startingVertex)
+	{
+		std::set<vector<string>> possiblePaths; 
+
+		std::vector<string> verticesWithoutStartingVertex;
+		for (int i = 0; i < vertices.size(); ++i)
+		{
+			if (vertices[i] != startingVertex)
+			{
+				verticesWithoutStartingVertex.push_back(vertices[i]);
+			}
+		}
+
+		std::vector<string> currentPath; 
+
+		currentPath.push_back(startingVertex); 
+
+		for (auto& vertex : verticesWithoutStartingVertex)
+		{
+			currentPath.push_back(vertex); 
+			//cout << std::left << std::setw(15) << vertex << "->";
+		}
+		currentPath.push_back(startingVertex); 
+		possiblePaths.insert(currentPath); 
+
+		currentPath.clear(); //clear!
+
+		while (myNextPermutation(verticesWithoutStartingVertex))
+		{
+			currentPath.push_back(startingVertex); 
+
+			//cout << std::left << std::setw(15) << startingVertex << "->";
+			for (auto& vertex : verticesWithoutStartingVertex)
+			{
+				currentPath.push_back(vertex); 
+			}
+			currentPath.push_back(startingVertex); 
+
+			possiblePaths.insert(currentPath); 
+
+			currentPath.clear(); //clear!
+		}
+
+		return possiblePaths; 
+	}
+
 	/*generate all possible paths, then find the one(s) of minimum weight*/
 	void bruteForceTSP_November14(string startingVertex)
 	{
@@ -1387,35 +1433,66 @@ for (auto& theVertex : vertices)
 		//}
 		//cout << "Total possible path count: " << possiblePathCount << "\n";
 
-		std::vector<string> verticesWithoutStartingVertex; 
-		for (int i = 0; i < vertices.size(); ++i)
-		{
-			if (vertices[i] != startingVertex)
-			{
-				verticesWithoutStartingVertex.push_back(vertices[i]);
-			}
-		}
-		cout << "If starting at " << startingVertex << ", visiting all cities, and going back to " << startingVertex
-			<< ", then possible paths are: \n";
-		cout << std::left << std::setw(15) << startingVertex << "->";
-		for (auto& vertex : verticesWithoutStartingVertex)
-		{
-			cout << std::left << std::setw(15) << vertex << "->";
-		}
-		cout << std::left << std::setw(15) << startingVertex << "\n";
+		//std::vector<string> verticesWithoutStartingVertex; 
+		//for (int i = 0; i < vertices.size(); ++i)
+		//{
+		//	if (vertices[i] != startingVertex)
+		//	{
+		//		verticesWithoutStartingVertex.push_back(vertices[i]);
+		//	}
+		//}
 
-		while (myNextPermutation(verticesWithoutStartingVertex))
-		{
-			cout << std::left << std::setw(15) << startingVertex << "->";
-			for (auto& vertex : verticesWithoutStartingVertex)
-			{
-				cout << std::left << std::setw(15) << vertex << "->";
-			}
-			cout << std::left << std::setw(15) << startingVertex << "\n";
+		//cout << "If starting at " << startingVertex << ", visiting all cities, and going back to " << startingVertex
+		//	<< ", then possible paths are: \n";
+		//cout << std::left << std::setw(15) << startingVertex << "->";
+		//for (auto& vertex : verticesWithoutStartingVertex)
+		//{
+		//	cout << std::left << std::setw(15) << vertex << "->";
+		//}
+		//cout << std::left << std::setw(15) << startingVertex << "\n";
 
-		}
+		//while (myNextPermutation(verticesWithoutStartingVertex))
+		//{
+		//	//cout << std::left << std::setw(15) << startingVertex << "->";
+		//	//for (auto& vertex : verticesWithoutStartingVertex)
+		//	//{
+		//	//	cout << std::left << std::setw(15) << vertex << "->";
+		//	//}
+		//	//cout << std::left << std::setw(15) << startingVertex << "\n";
+
+		//}
 		//if (std::find())
 
+		auto possiblePaths = generatePossiblePaths_ForTSP(startingVertex); 
+	
+		//print paths (optional, for sanity check) 
+		for (auto& path : possiblePaths)
+		{
+			int counter = 1; 
+			for (auto& city : path)
+			{
+				cout << std::left << std::setw(15) << city; 
+				if (counter < path.size())
+				{
+					cout << "->";
+				}
+				counter++; 
+			}
+			cout << "\n";
+		}
+
+		for (auto& path : possiblePaths)
+		{
+			int totalPathWeight = 0; 
+			for (int i = 0; i < path.size() - 1; ++i)
+			{
+				totalPathWeight += findEdgeWeight(path[i], path[i + 1]);
+			}
+
+			cout << "Total path weight: " << totalPathWeight << " miles\n";
+		}
+
+		//get weights of each path: 
 
 	}
 
