@@ -131,6 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Generating a graph of cities from text file.cpp" />
     <ClCompile Include="July15-continuingGraphs.cpp" />
     <ClCompile Include="July16-yetMoreGraphPlay-WithGrids.cpp" />
     <ClCompile Include="July17-KnightsWalk.cpp" />
@@ -143,6 +144,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graph.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="copilot generated cities and their coordinates.txt" />
+    <Text Include="some cities and their latitudes and longitudes.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

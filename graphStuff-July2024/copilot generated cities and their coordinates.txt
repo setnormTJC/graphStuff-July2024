@@ -1,0 +1,8 @@
+San Francisco CA,37.77,-122.42
+New York NY,40.71,-74.01
+Miami FL,25.76,-80.19
+Denver CO,39.74,-104.99
+Chicago IL,41.88,-87.63
+Los Angeles CA,34.05,-118.24
+Houston TX, 29.76, -95.37
+Seattle WA, 47.61, -122.33

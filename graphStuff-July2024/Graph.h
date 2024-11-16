@@ -868,15 +868,28 @@ struct WeightedEdge
 	string vertex2; 
 	int weight; 
 
-	bool operator == (const WeightedEdge& otherWeightedEdge)
+	bool operator == (const WeightedEdge& otherWeightedEdge) const 
 	{
 		return
-			(this->vertex1 == otherWeightedEdge.vertex1
-				&&
-				this->vertex2 == otherWeightedEdge.vertex2
-				&&
-				this->weight == otherWeightedEdge.weight);
+			(vertex1 == otherWeightedEdge.vertex1 && vertex2 == otherWeightedEdge.vertex2 && weight == otherWeightedEdge.weight)
+			||
+			(vertex1 == otherWeightedEdge.vertex2 && vertex2 == otherWeightedEdge.vertex1 && weight == otherWeightedEdge.weight)
+			;
+			//the OR above prevents, for example, adding ABQ -> Austin if Austin -> ABQ is already present 
 
+	
+			//(this->vertex1 == otherWeightedEdge.vertex1
+			//	&&
+			//	this->vertex2 == otherWeightedEdge.vertex2
+			//	&&
+			//	this->weight == otherWeightedEdge.weight);
+
+	}
+
+
+	bool operator < (const WeightedEdge& otherWeightedEdge) const 
+	{
+		return this->vertex1 < otherWeightedEdge.vertex1; 
 	}
 };
 
@@ -1317,7 +1330,18 @@ for (auto& theVertex : vertices)
 			return; //a bit goofy for the user with two returns here
 		}
 
+		WeightedEdge newEdge = { firstVertex, secondVertex, weight }; 
+
+		for (const auto& edge : edges)
+		{
+			if (edge == newEdge) //note the overloaded == operator in def. of WeightedEdge
+			{
+				return; //return without adding the edge 
+			}
+		}
+
 		edges.push_back({ firstVertex, secondVertex, weight });
+
 
 	}
 
@@ -1496,79 +1520,48 @@ for (auto& theVertex : vertices)
 
 	}
 
-	/*
-	ABANDONED - for now
-	traverses all possible paths (by def, a "path" does visits each vertex only once)
-	Assumes (to some extent) that graph is COMPLETE 
-	for all paths, stores map of path and its total weight (distance) 
-	@return  the path (concatenated string, ex: Austin->Chicago->Boston->etc) 
-	and its weight (as std::pair)
-	*/
-	map<int, string> solveTSP_ByBruteForce(string startingVertex)
-	{
-		if (!isCompleteGraph())
-		{
-			cout << "Warning - graph is not complete -> might get stuck here ...";
-		}
-
-		map<int, string> pathsAndTheirWeights;
-
-		string currentVertex = startingVertex;
-
-		vector<string> alreadyVisited;// = { currentVertex };
-
-		random_device rd;
-		mt19937 engine(rd());
-
-		int totalPathWeight = 0;
-
-		string pathSoFar = startingVertex;
-
-		do
-		{
-			auto neighbors = getNeighborsOfVertex(currentVertex);
-
-			vector<string> nonvisitedNeighbors;
-			//remove previously-visted neighbors from consideration: 
-			for (auto& theNeighbor : neighbors)
-			{
-				if (std::find(neighbors.begin(), neighbors.end(), theNeighbor) == neighbors.end())
-				{
-					nonvisitedNeighbors.push_back(theNeighbor);
-				}
-			}
-
-
-			uniform_int_distribution<int> dist(0, neighbors.size() - 1);
-
-			//pick random neighbor from remainder
-
-			int chosenIndex = dist(engine);  //maybe the correct syntax
-
-			string chosenNeighbor = neighbors[chosenIndex];
-			//update currentVertex
-			alreadyVisited.push_back(chosenNeighbor);
-
-			totalPathWeight += findEdgeWeight(currentVertex, chosenNeighbor);
-
-			currentVertex = chosenNeighbor;
-
-			cout << "Moving to " << chosenNeighbor << "\n";
-			pathSoFar += "->" + chosenNeighbor;
-
-
-		} while (currentVertex != startingVertex);
-
-		pathsAndTheirWeights.insert({ totalPathWeight, pathSoFar });
-
-		return pathsAndTheirWeights;
-	}
-
 	//is it "greedy" or "lazy"? 
 	// Chooses to take shortest edge (excluding previously-visited vertices) at all steps 
-	void approximatelySolveTSP_WithGreed()
+	void approximatelySolveTSP_WithGreed(const string& startingVertex)
 	{
+		unordered_set<string> visited; 
 
+		string currentVertex = startingVertex; 
+
+		visited.insert(currentVertex); 
+		cout << currentVertex << "->";
+		while (visited.size() < vertices.size())
+		{
+			//first, pick minimum weight edge from startVert
+			int minWeight = INT_MAX;
+			string nextVertex; 
+
+			for (auto& vertex : vertices)
+			{
+				if (visited.find(vertex) == visited.end()) //not yet visited 
+				{
+					int distance = findEdgeWeight(currentVertex, vertex);
+
+					if (distance < minWeight)
+					{
+						minWeight = distance; 
+						nextVertex = vertex; 
+					}
+
+				}
+			}
+			visited.insert(nextVertex); 
+			currentVertex = nextVertex; 
+	
+			cout << currentVertex << "(" << minWeight << ") ->"; 
+			//startingVertex = vertices.at()
+			//cout << "Closest neighbor is this far: " << minWeight << "\n";
+
+		}
+
+		//finally, go back to start: 
+		int weightOfDistanceBackToStart = findEdgeWeight(currentVertex, startingVertex); 
+		cout << "Final step distance: " << weightOfDistanceBackToStart << "\n";
 	}
 
 };

@@ -1,0 +1,6 @@
+Austin TX,30.29,-97.74
+Dallas TX,32.73,-96.80
+Tyler TX,32.33,-95.30
+New Orleans LA,29.93,-90.09
+Bangor ME,44.79,-68.79
+Seattle WA,47.56,-122.22

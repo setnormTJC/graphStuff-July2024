@@ -42,10 +42,21 @@
     <ClCompile Include="permutationsHeaderFile.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="Generating a graph of cities from text file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="some cities and their latitudes and longitudes.txt">
+      <Filter>Source Files</Filter>
+    </Text>
+    <Text Include="copilot generated cities and their coordinates.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
