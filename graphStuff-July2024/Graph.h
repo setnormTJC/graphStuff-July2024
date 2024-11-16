@@ -20,6 +20,9 @@
 #include<thread> 
 #include<chrono> //thread and chrono for platform-independent pausing while taking random walk and displaying updated grid
 
+
+#include"C:/Users/Work/Desktop/myCppLibrary/algos/swapShuffleReverseAndPermutations.h"
+
 using namespace std; 
 
 
@@ -1356,29 +1359,64 @@ for (auto& theVertex : vertices)
 		return true;
 	}
 
+	/**/
+	void printPath_AssumingCompleteGraph()
+	{
+
+		for (int i = 0; i < vertices.size() - 1; ++i)
+		{
+			cout << std::left << std::setw(20) << vertices.at(i) 
+				<< std::left << std::setw(4) << "-> ";
+		}
+		//print final vertex without the trailing -> 
+		cout << vertices.at(vertices.size() - 1) << "\n";
+	}
 
 	/*generate all possible paths, then find the one(s) of minimum weight*/
 	void bruteForceTSP_November14(string startingVertex)
 	{
-		set<string> possiblePaths; //using a set (not vector) to prevent duplicate paths 
+		//first, test myNextPermutation with all cities: 
+		//int possiblePathCount = 1; 
 
-		//for (int i = 0; i < vertices.size(); ++i)
+		//printPath_AssumingCompleteGraph();
+		//while (myNextPermutation(vertices))
 		//{
-		while (possiblePaths.size() < (vertices.size())) //modify to (N - 1) !
+		//	printPath_AssumingCompleteGraph(); 
+		//	//cout << "\nNext permutation of cities:\n";
+		//	possiblePathCount++; 
+		//}
+		//cout << "Total possible path count: " << possiblePathCount << "\n";
+
+		std::vector<string> verticesWithoutStartingVertex; 
+		for (int i = 0; i < vertices.size(); ++i)
 		{
-			string onePossiblePath;
-
-			auto neighborsOfStartVertex = getNeighborsOfVertex(startingVertex);
-
-			while (!neighborsOfStartVertex.empty())
+			if (vertices[i] != startingVertex)
 			{
-
-
-				possiblePaths.insert(onePossiblePath); //inserting duplicate will not increase set size
+				verticesWithoutStartingVertex.push_back(vertices[i]);
 			}
+		}
+		cout << "If starting at " << startingVertex << ", visiting all cities, and going back to " << startingVertex
+			<< ", then possible paths are: \n";
+		cout << std::left << std::setw(15) << startingVertex << "->";
+		for (auto& vertex : verticesWithoutStartingVertex)
+		{
+			cout << std::left << std::setw(15) << vertex << "->";
+		}
+		cout << std::left << std::setw(15) << startingVertex << "\n";
+
+		while (myNextPermutation(verticesWithoutStartingVertex))
+		{
+			cout << std::left << std::setw(15) << startingVertex << "->";
+			for (auto& vertex : verticesWithoutStartingVertex)
+			{
+				cout << std::left << std::setw(15) << vertex << "->";
+			}
+			cout << std::left << std::setw(15) << startingVertex << "\n";
 
 		}
-//		}
+		//if (std::find())
+
+
 	}
 
 	/*

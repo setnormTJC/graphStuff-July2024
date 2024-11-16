@@ -4,6 +4,7 @@ WeightedUndirectedGraph generateGraphOfFourCities()
 {
 	WeightedUndirectedGraph graphOfFourCities; 
 
+	//it would be reasonable to add these vertices in ALPHABETICAL order (because next_permutation may be used in TSP algo) 
 	graphOfFourCities.addVertex("Albuquerque");
 	graphOfFourCities.addVertex("Atlanta");
 	graphOfFourCities.addVertex("Austin"); 
@@ -33,8 +34,6 @@ int main(int argc, char* argv)
 	srand(time(0));
 
 	graphOfFourCities.bruteForceTSP_November14(startCity); 
-
-
 
 
 
